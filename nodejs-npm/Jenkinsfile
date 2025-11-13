@@ -1,0 +1,30 @@
+@Library('blackduck-logs-publisher') _
+
+pipeline {
+    agent { label 'mac-sh' }
+
+    stages {
+        
+        stage("coverity-buildless-scan") {
+            steps {
+                script {
+                    dir('nodejs-npm') {
+                        security_scan coverity_waitForScan: true, product: 'coverity'
+
+                        
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            pushJenkinsLogsToGitHub([
+                githubOrg: 'coverity-cnc-jenkins-samples',
+                repoName: 'buildless-scan',
+                retentionCount: 5
+            ])
+        }
+    }
+}
